@@ -3,7 +3,7 @@
 
 Official implementation of the paper:
 
-> **FruArIC: Frugal Architecture for Identifying Container Codes in Port Automation**
+> **Matching model capacity to format constraints: a frugal architecture for container code identification on edge- oriented in port automation**
 
 ---
 
@@ -102,13 +102,13 @@ For example, an image and a JSON file with the same filename stem are treated as
 #### 1.2 Source Data Cleaning
 
 ```bash
-python -m DataProcessing.DataProcessing_Src --src_img source_data/images --src_json source_data/json
+python -m DataProcessing.DataProcessing_Src --src_img "source_data/images" --src_json "source_data/json"
 ```
 
 #### 1.3 Detector Dataset Preparation
 
 ```bash
-python -m DataProcessing.DataProcessing_RegionDet --src_img source_data/images --src_json source_data/json --dir_data datasets/region_detection
+python -m DataProcessing.DataProcessing_RegionDet --src_img "source_data/images" --src_json "source_data/json" --dir_data "datasets/region_detection"
 ```
 
 The dataset is organized as follows:
@@ -130,7 +130,7 @@ datasets/region_detection/
 #### 1.4 Text Recognition Dataset Preparation
 
 ```bash
-python -m DataProcessing.DataProcessing_CharRec --src_img source_data/images --src_json source_data/json --work_dir datasets/character_recognition
+python -m DataProcessing.DataProcessing_CharRec --src_img "source_data/images" --src_json "source_data/json" --work_dir "datasets/character_recognition"
 ```
 
 The dataset is organized as follows:
@@ -151,10 +151,10 @@ datasets/character_recognition/
     └── test/
 ```
 
-#### 1.5 Benchmark Dataset Generation
+#### 1.5 Benchmark Dataset Preparation
 
 ```bash
-python -m DataProcessing.DataProcessing_Experiments --src_img benchmark_source/images --src_json benchmark_source/json --exp_img benchmark_selected/images --exp_json benchmark_selected/json --processed_dir datasets/benchmark/images
+python -m DataProcessing.DataProcessing_Experiments --src_img "benchmark_source/images" --src_json "benchmark_source/json" --exp_img "benchmark_selected/images" --exp_json "benchmark_selected/json" --processed_dir "datasets/benchmark/images"
 ```
 
 Each benchmark image filename must contain its ground-truth container identification code.
@@ -173,7 +173,7 @@ datasets/benchmark/images/
 #### 2.1 Code Region Detector Training
 
 ```bash
-python -m RegionDet.train --model_cfg RegionDet/cfg/TailoredDet.yaml --data datasets/region_detection/data.yaml --epochs 100 --patience 10 --imgsz 640 --name TailoredDet
+python -m RegionDet.train --model_cfg "RegionDet/cfg/TailoredDet.yaml" --data "data.yaml" --epochs 100 --patience 10 --imgsz 640 --name TailoredDet
 ```
 
 #### 2.2 Text Recognizer Training
