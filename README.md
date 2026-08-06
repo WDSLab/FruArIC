@@ -77,6 +77,8 @@ FruArIC is a lightweight two-stage framework designed for container code recogni
 
 # Usage
 
+All commands must be executed from the repository root directory
+
 ### 1. Data Preprocessing
 
 #### 1.1 Source Data Structure
@@ -100,13 +102,13 @@ For example, an image and a JSON file with the same filename stem are treated as
 #### 1.2 Source Data Cleaning
 
 ```bash
-python DataProcessing/DataProcessing_Src.py --src_img source_data/images --src_json source_data/json
+python -m DataProcessing.DataProcessing_Src --src_img source_data/images --src_json source_data/json
 ```
 
 #### 1.3 Detector Dataset Preparation
 
 ```bash
-python DataProcessing/DataProcessing_RegionDet.py --src_img source_data/images --src_json source_data/json --dir_data datasets/region_detection
+python -m DataProcessing.DataProcessing_RegionDet --src_img source_data/images --src_json source_data/json --dir_data datasets/region_detection
 ```
 
 The dataset is organized as follows:
@@ -128,7 +130,7 @@ datasets/region_detection/
 #### 1.4 Text Recognition Dataset Preparation
 
 ```bash
-python DataProcessing/DataProcessing_CharRec.py --src_img source_data/images --src_json source_data/json --work_dir datasets/character_recognition
+python -m DataProcessing.DataProcessing_CharRec --src_img source_data/images --src_json source_data/json --work_dir datasets/character_recognition
 ```
 
 The dataset is organized as follows:
@@ -152,7 +154,7 @@ datasets/character_recognition/
 #### 1.5 Benchmark Dataset Generation
 
 ```bash
-python DataProcessing/DataProcessing_Experiments.py --src_img benchmark_source/images --src_json benchmark_source/json --exp_img benchmark_selected/images --exp_json benchmark_selected/json --processed_dir datasets/benchmark/images
+python -m DataProcessing.DataProcessing_Experiments --src_img benchmark_source/images --src_json benchmark_source/json --exp_img benchmark_selected/images --exp_json benchmark_selected/json --processed_dir datasets/benchmark/images
 ```
 
 Each benchmark image filename must contain its ground-truth container identification code.
@@ -168,13 +170,13 @@ datasets/benchmark/images/
 
 ### 2. Model Training
 
-#### 2.1 Detector Training
+#### 2.1 Code Region Detector Training
 
 ```bash
-python RegionDet/train.py --model_cfg RegionDet/cfg/TailoredDet.yaml --data datasets/region_detection/data.yaml --epochs 100 --patience 10 --imgsz 640 --name TailoredDet
+python -m RegionDet.train --model_cfg RegionDet/cfg/TailoredDet.yaml --data datasets/region_detection/data.yaml --epochs 100 --patience 10 --imgsz 640 --name TailoredDet
 ```
 
-#### 2.2 Recognizer Training
+#### 2.2 Text Recognizer Training
 
 The text recognizers are trained in the following order:
 
@@ -191,31 +193,31 @@ DeformableGRCNN_l
 ##### Step 1: Train DeformableGRCNN-l
 
 ```bash
-python CharRec/train.py --FeatureExtraction DeformableGRCNN_l --output_channel 1280 --train_data datasets/character_recognition/lmdb/train --valid_data datasets/character_recognition/lmdb/validation
+python -m CharRec.train --FeatureExtraction DeformableGRCNN_l --output_channel 1280 --train_data "train_data_path" --valid_data "valid_data_path" 
 ```
 
 ##### Step 2: DeformableGRCNN-l → DeformableCNN-l
 
 ```bash
-python CharRec/train.py --FeatureExtraction DeformableCNN_l --output_channel 1280 --train_data datasets/character_recognition/lmdb/train --valid_data datasets/character_recognition/lmdb/validation --distillation --teacher_path saved_models/DeformableGRCNN_l/best_accuracy.pth --teacher_backbone DeformableGRCNN_l --teacher_output 1280 --copy_weights
+python -m CharRec.train --FeatureExtraction DeformableCNN_l --output_channel 1280 --train_data "train_data_path" --valid_data "valid_data_path" --distillation --teacher_path "saved_models/DeformableGRCNN_l/best_accuracy.pth" --teacher_backbone DeformableGRCNN_l --teacher_output 1280 --copy_weights
 ```
 
 ##### Step 3: DeformableCNN-l → DeformableCNN-s
 
 ```bash
-python CharRec/train.py --FeatureExtraction DeformableCNN_s --output_channel 512 --train_data datasets/character_recognition/lmdb/train --valid_data datasets/character_recognition/lmdb/validation --distillation --teacher_path saved_models/DeformableCNN_l_fromDeformableGRCNN_l/best_accuracy.pth --teacher_backbone DeformableCNN_l --teacher_output 1280
+python -m CharRec.train --FeatureExtraction DeformableCNN_s --output_channel 512 --train_data "train_data_path" --valid_data "valid_data_path" --distillation --teacher_path "saved_models/DeformableCNN_l_fromDeformableGRCNN_l/best_accuracy.pth" --teacher_backbone DeformableCNN_l --teacher_output 1280
 ```
 
 ##### Step 4: DeformableCNN-s → CNN-s
 
 ```bash
-python CharRec/train.py --FeatureExtraction CNN_s --output_channel 512 --train_data datasets/character_recognition/lmdb/train --valid_data datasets/character_recognition/lmdb/validation --distillation --teacher_path saved_models/DeformableCNN_s_fromDeformableCNN_l/best_accuracy.pth --teacher_backbone DeformableCNN_s --teacher_output 512 --copy_weights
+python -m CharRec.train --FeatureExtraction CNN_s --output_channel 512 --train_data "train_data_path" --valid_data "valid_data_path" --distillation --teacher_path "saved_models/DeformableCNN_s_fromDeformableCNN_l/best_accuracy.pth" --teacher_backbone DeformableCNN_s --teacher_output 512 --copy_weights
 ```
 
 #### 2.4 Text Recognizer Evaluation
 
 ```bash
-python CharRec/test.py --FeatureExtraction CNN_s --output_channel 512 --eval_data datasets/character_recognition/lmdb/test --saved_model saved_models/CNN_s_fromDeformableCNN_s/best_accuracy.pth
+python -m CharRec.test --FeatureExtraction CNN_s --output_channel 512 --eval_data "test_data_path" --saved_model "saved_models/CNN_s_fromDeformableCNN_s/best_accuracy.pth"
 ```
 
 ---
@@ -225,7 +227,7 @@ python CharRec/test.py --FeatureExtraction CNN_s --output_channel 512 --eval_dat
 Run the following command to benchmark the end-to-end pipeline combining the detector and text recognizer:
 
 ```bash
-python main.py --image_folder datasets/benchmark/images --detector_path runs/detect/TailoredDet/weights/best.pt --recognizer_path saved_models/CNN_s_fromDeformableCNN_s/best_accuracy.pth
+python -m main --image_folder "benchmark_data_path" --detector_path "detector_path" --recognizer_path "recognizer_path"
 ```
 
 The filename stem of each benchmark image is used as its ground-truth string.
