@@ -1,0 +1,12 @@
+torch
+torchvision
+ultralytics
+numpy
+Pillow
+opencv-python
+lmdb
+natsort
+scikit-learn
+tqdm
+nltk
+six
