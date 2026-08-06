@@ -213,12 +213,6 @@ python -m CharRec.train --FeatureExtraction DeformableCNN_s --output_channel 512
 python -m CharRec.train --FeatureExtraction CNN_s --output_channel 512 --train_data "train_data_path" --valid_data "valid_data_path" --distillation --teacher_path "saved_models/DeformableCNN_s_fromDeformableCNN_l/best_accuracy.pth" --teacher_backbone DeformableCNN_s --teacher_output 512 --copy_weights
 ```
 
-#### 2.4 Text Recognizer Evaluation
-
-```bash
-python -m CharRec.test --FeatureExtraction CNN_s --output_channel 512 --eval_data "test_data_path" --saved_model "saved_models/CNN_s_fromDeformableCNN_s/best_accuracy.pth"
-```
-
 ---
 
 ### 3. Benchmarking with `main.py`
