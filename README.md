@@ -1,5 +1,4 @@
-# FruArIC
-### Frugal Architecture for Identifying Container Codes in Port Automation
+# FruArIC (Frugal Architecture for Identifying Container Codes)
 
 Official implementation of the paper:
 
