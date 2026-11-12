@@ -23,10 +23,16 @@ import torch.optim as optim
 import torch.utils.data
 import numpy as np
 
-from CharRec.utils import CTCLabelConverter, Averager
-from CharRec.dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
-from CharRec.model import Model
-from CharRec.test import validation
+if __package__:
+    from .utils import CTCLabelConverter, Averager
+    from .dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
+    from .model import Model
+    from .test import validation
+else:
+    from utils import CTCLabelConverter, Averager
+    from dataset import hierarchical_dataset, AlignCollate, Batch_Balanced_Dataset
+    from model import Model
+    from test import validation
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
 

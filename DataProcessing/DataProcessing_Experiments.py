@@ -7,10 +7,13 @@ from pathlib import Path
 import numpy as np
 from tqdm import tqdm
 
-from CharRec.DataProcessing_Src import clean_data
+if __package__:
+    from .DataProcessing_Src import clean_data
+else:
+    from DataProcessing_Src import clean_data
 
 
-def select_data(src_img, src_json, dst_img, dst_json, n_select):
+def select_data(src_img, src_json, dst_img, dst_json, n_select, mode, seed=None):
     src_img = Path(src_img)
     src_json = Path(src_json)
     dst_img = Path(dst_img)
@@ -20,7 +23,18 @@ def select_data(src_img, src_json, dst_img, dst_json, n_select):
     dst_json.mkdir(parents=True, exist_ok=True)
 
     img_lst = sorted([p.name for p in src_img.iterdir() if p.suffix.lower() == ".jpg"])
-    indices = np.linspace(0, len(img_lst) - 1, n_select, dtype=int)
+    if not 1 <= n_select <= len(img_lst):
+        raise ValueError("n_select must be between 1 and the number of source images")
+    if mode == "uniform":
+        if seed is not None:
+            raise ValueError("seed is only supported in random mode")
+        indices = np.linspace(0, len(img_lst) - 1, n_select, dtype=int)
+    elif mode == "random":
+        if seed is None or seed < 0:
+            raise ValueError("random mode requires a non-negative seed")
+        indices = np.random.default_rng(seed).choice(len(img_lst), size=n_select, replace=False)
+    else:
+        raise ValueError("mode must be 'uniform' or 'random'")
     selected_lst = [img_lst[i] for i in indices]
 
     for img_name in selected_lst:
@@ -68,8 +82,17 @@ if __name__ == "__main__":
     parser.add_argument("--exp_json", required=True, help="path to selected experiment json directory")
     parser.add_argument("--processed_dir", required=True, help="path to processed experiment image directory")
     parser.add_argument("--n_select", type=int, default=1000)
+    parser.add_argument("--mode", choices=["uniform", "random"], required=True)
+    parser.add_argument("--seed", type=int, help="non-negative seed; required for random mode")
 
     opt = parser.parse_args()
+    if opt.mode == "random" and opt.seed is None:
+        parser.error("--mode random requires --seed")
+    if opt.mode == "uniform" and opt.seed is not None:
+        parser.error("--seed is only supported with --mode random")
+    if opt.seed is not None and opt.seed < 0:
+        parser.error("--seed must be non-negative")
     clean_data(opt.src_img, opt.src_json)
-    select_data(opt.src_img, opt.src_json, opt.exp_img, opt.exp_json, opt.n_select)
+    select_data(opt.src_img, opt.src_json, opt.exp_img, opt.exp_json,
+                opt.n_select, opt.mode, opt.seed)
     build_data(opt.exp_img, opt.exp_json, opt.processed_dir)

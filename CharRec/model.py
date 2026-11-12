@@ -8,9 +8,14 @@
 # Modifications were made for the proposed container code recognition framework.
 
 import torch.nn as nn
-from CharRec.modules.feature_extraction import (DeformableGRCNN_l_FeatureExtractor,
-                                        DeformableCNN_l_FeatureExtractor, DeformableCNN_s_FeatureExtractor,
-                                        CNN_s_FeatureExtractor)
+if __package__:
+    from .modules.feature_extraction import (DeformableGRCNN_l_FeatureExtractor,
+                                            DeformableCNN_l_FeatureExtractor, DeformableCNN_s_FeatureExtractor,
+                                            CNN_s_FeatureExtractor)
+else:
+    from modules.feature_extraction import (DeformableGRCNN_l_FeatureExtractor,
+                                            DeformableCNN_l_FeatureExtractor, DeformableCNN_s_FeatureExtractor,
+                                            CNN_s_FeatureExtractor)
 
 class Model(nn.Module):
     def __init__(self, opt):

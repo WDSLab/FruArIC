@@ -2,7 +2,7 @@
 
 Official implementation of the paper:
 
-> **Matching model capacity to format constraints: a frugal architecture for container code identification on edge- oriented in port automation**
+> **Matching Model Capacity to Format Constraints: A Frugal Architecture for Identifying Container Codes in Port Automation**
 
 ---
 
@@ -25,7 +25,7 @@ FruArIC is a lightweight two-stage framework designed for container code recogni
 | Full-string Accuracy | **90.233%** |
 | Parameters | **0.816 M** |
 | MACs | **2.118 G** |
-| CPU Latency | **13.955 ms** |
+| CPU Latency | **67.030 ms** |
 
 ---
 
@@ -63,13 +63,34 @@ FruArIC is a lightweight two-stage framework designed for container code recogni
 ### Hardware
 
 - Training: NVIDIA GeForce RTX 5080
-- Inference: Intel Ultra 7 265K CPU
+- Inference: Intel Core Ultra 7 265K CPU (2 P-cores, 2 threads, maximum 3.7 GHz; 4 GiB combined committed-memory limit; FP32, batch size 1)
 
 ---
 
 # Experimental Results
 
-<img width="692" height="449" alt="Image" src="https://github.com/user-attachments/assets/70fb6961-e38e-4006-9865-650469060d4a" />
+Results with format correction enabled, from Tables 4 and 5 of the manuscript. Latency is the mean end-to-end processing time, including preprocessing and postprocessing, on the constrained CPU configuration above.
+
+| Detection | Recognition | Params (M) | Accuracy (%, mean (SD)) | MACs (G) | Latency (ms) |
+|---|---|---:|---:|---:|---:|
+| RT-DETR | ABINet | 69.547 | 83.533 (11.552) | 63.876 | 886.817 |
+| RT-DETR | ASTER | 51.886 | 80.667 (6.224) | 57.426 | 813.305 |
+| RT-DETR | SRN | 87.48 | 86.067 (7.955) | 58.446 | 819.647 |
+| RT-DETR | SVTR | 38.845 | 51.222 (28.393) | 54.095 | 735.609 |
+| YOLO26 | ABINet | 39.243 | 84.289 (8.396) | 12.766 | 232.658 |
+| YOLO26 | ASTER | 21.582 | 81.444 (7.934) | 6.316 | 154.027 |
+| YOLO26 | SRN | 57.176 | 84.933 (7.614) | 7.336 | 153.785 |
+| YOLO26 | SVTR | 8.541 | 72.667 (6.811) | 2.985 | 97.173 |
+| YOLOv12 | ABINet | 39.307 | 90.989 (1.810) | 13.120 | 257.652 |
+| YOLOv12 | ASTER | 21.646 | 87.300 (2.107) | 6.670 | 176.075 |
+| YOLOv12 | SRN | 57.24 | 92.133 (1.077) | 7.690 | 177.869 |
+| YOLOv12 | SVTR | 8.605 | 85.211 (2.450) | 3.339 | 115.527 |
+| YOLOv11 | ABINet | 39.329 | 91.733 (0.561) | 13.100 | 238.894 |
+| YOLOv11 | ASTER | 21.667 | 87.744 (1.180) | 6.650 | 159.050 |
+| YOLOv11 | SRN | 57.262 | 92.044 (1.226) | 7.670 | 164.120 |
+| YOLOv11 | SVTR | 8.627 | 83.933 (2.214) | 3.320 | 101.762 |
+| YOLOv8-SL | SVTR-R | 8.520 | 83.256 (3.865) | 3.840 | 133.116 |
+| TailoredDet | PureConvSTR | 0.816 | 90.233 (1.989) | 2.118 | 67.030 |
 
 ---
 
@@ -153,8 +174,10 @@ datasets/character_recognition/
 #### 1.5 Benchmark Dataset Preparation
 
 ```bash
-python -m DataProcessing.DataProcessing_Experiments --src_img "benchmark_source/images" --src_json "benchmark_source/json" --exp_img "benchmark_selected/images" --exp_json "benchmark_selected/json" --processed_dir "datasets/benchmark/images"
+python -m DataProcessing.DataProcessing_Experiments --src_img "benchmark_source/images" --src_json "benchmark_source/json" --exp_img "benchmark_selected/images" --exp_json "benchmark_selected/json" --processed_dir "datasets/benchmark/images" --mode random --seed 1111
 ```
+
+The seed above is an example, not a documented seed for the paper's evaluation set. Specify `--mode random --seed <seed>` for seeded random sampling or `--mode uniform` for evenly spaced selection; the mode is required.
 
 Each benchmark image filename must contain its ground-truth container identification code.
 

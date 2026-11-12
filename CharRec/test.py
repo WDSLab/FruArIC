@@ -14,9 +14,14 @@ import torch.utils.data
 import torch.nn.functional as F
 from nltk.metrics.distance import edit_distance
 
-from CharRec.utils import CTCLabelConverter, Averager
-from CharRec.dataset import hierarchical_dataset, AlignCollate
-from CharRec.model import Model
+if __package__:
+    from .utils import CTCLabelConverter, Averager
+    from .dataset import hierarchical_dataset, AlignCollate
+    from .model import Model
+else:
+    from utils import CTCLabelConverter, Averager
+    from dataset import hierarchical_dataset, AlignCollate
+    from model import Model
 #device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 device = torch.device('cpu')
 
